@@ -30,13 +30,13 @@ io.on('connection', (socket) => {
     });
 });
 
-// API Endpoint (optional)
+// API Endpoint
 app.get('/', (req, res) => {
     res.send('Socket server is running!');
 });
 
 // Start server
 const PORT = 4565;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server listening on port ${PORT}`);
 });
