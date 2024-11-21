@@ -29,6 +29,12 @@ io.on('connection', (socket) => {
         io.emit('alarm', { status: 'RED' }); // Broadcast alarm to all connected clients
     });
 
+    // Handle alarm removal
+    socket.on('remove-alarm', () => {
+        console.log('Alarm removed');
+        io.emit('alarm', { status: 'OFF' }); // Broadcast alarm removal to all connected clients
+    });
+
     // Handle socket disconnection
     socket.on('disconnect', () => {
         console.log('A user disconnected:', socket.id);

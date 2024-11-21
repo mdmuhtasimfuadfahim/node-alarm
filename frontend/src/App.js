@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import './App.css'; // For red animation styles
 
@@ -8,31 +8,35 @@ function App() {
   const [alarm, setAlarm] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
 
+  useEffect(() => {
+    // Establish WebSocket connection to the backend
+    socket = io('http://45.248.150.228:4565'); // Backend WebSocket URL
+    setIsConnected(true);
+
+    // Listen for alarm events from the backend
+    socket.on('alarm', (data) => {
+      setAlarm(data.status); // Update alarm state when triggered
+    });
+
+    console.log('Socket connected');
+
+    // Cleanup on component unmount
+    return () => {
+      socket.disconnect();
+      setIsConnected(false);
+      console.log('Socket disconnected');
+    };
+  }, []);
+
   const triggerAlarm = () => {
-    if (!isConnected) {
-      // Establish WebSocket connection to the backend
-      socket = io('http://45.248.150.228:4565'); // Backend WebSocket URL
-      setIsConnected(true);
-
-      // Listen for alarm events from the backend
-      socket.on('alarm', (data) => {
-        setAlarm(data.status); // Update alarm state when triggered
-      });
-
-      console.log('Socket connected');
-    }
-
     if (socket && isConnected) {
       socket.emit('trigger-alarm'); // Send alarm trigger event to the backend
     }
   };
 
   const removeAlarm = () => {
-    if (socket) {
-      socket.disconnect(); // Disconnect the WebSocket
-      setIsConnected(false);
-      setAlarm(null); // Reset alarm state
-      console.log('Socket disconnected');
+    if (socket && isConnected) {
+      socket.emit('remove-alarm'); // Send alarm removal event to the backend
     }
   };
 
@@ -46,7 +50,7 @@ function App() {
         Remove Alarm
       </button>
 
-      {alarm === 'RED' && isConnected && (
+      {alarm === 'RED' && (
         <div className="alarm-animation" style={styles.alarm}>
           <h2>🚨 Alarm Triggered!</h2>
           <audio autoPlay loop>
