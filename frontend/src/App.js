@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { io } from 'socket.io-client';
 import './App.css'; // For red animation styles
 
-let socket; // Declare socket globally
+let socket; // Global socket variable
 
 function App() {
   const [alarm, setAlarm] = useState(null);
@@ -10,26 +10,26 @@ function App() {
 
   const triggerAlarm = () => {
     if (!isConnected) {
-      // Establish socket connection
-      socket = io('http://45.248.150.228:4565');
+      // Establish WebSocket connection to the backend
+      socket = io('http://45.248.150.228:4565'); // Backend WebSocket URL
       setIsConnected(true);
 
-      // Listen for alarm events
+      // Listen for alarm events from the backend
       socket.on('alarm', (data) => {
-        setAlarm(data.status); // Update alarm state when alarm is triggered
+        setAlarm(data.status); // Update alarm state when triggered
       });
 
       console.log('Socket connected');
     }
 
     if (socket && isConnected) {
-      socket.emit('trigger-alarm'); // Emit alarm event
+      socket.emit('trigger-alarm'); // Send alarm trigger event to the backend
     }
   };
 
   const removeAlarm = () => {
     if (socket) {
-      socket.disconnect(); // Disconnect the socket
+      socket.disconnect(); // Disconnect the WebSocket
       setIsConnected(false);
       setAlarm(null); // Reset alarm state
       console.log('Socket disconnected');

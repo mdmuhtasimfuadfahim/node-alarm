@@ -5,38 +5,38 @@ const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
+
+// Configure CORS for HTTP routes
+app.use(cors({
+    origin: '*', // Allow all origins
+}));
+
+// Initialize Socket.IO with CORS for WebSocket connections
 const io = new Server(server, {
     cors: {
-        origin: '*',
+        origin: 'http://45.248.150.228:3000', // Allow the frontend origin
+        methods: ['GET', 'POST'], // HTTP methods allowed
     },
 });
 
-// Middleware
-app.use(cors());
-
-// Socket connection
+// Handle socket connections
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
     // Handle alarm trigger
     socket.on('trigger-alarm', () => {
         console.log('Alarm triggered');
-        io.emit('alarm', { status: 'RED' }); // Broadcast to all clients
+        io.emit('alarm', { status: 'RED' }); // Broadcast alarm to all connected clients
     });
 
-    // Handle disconnect
+    // Handle socket disconnection
     socket.on('disconnect', () => {
         console.log('A user disconnected:', socket.id);
     });
 });
 
-// API Endpoint
-app.get('/', (req, res) => {
-    res.send('Socket server is running!');
-});
-
-// Start server
+// Start the server
 const PORT = 4565;
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server listening on port ${PORT}`);
+    console.log(`Server running on http://45.248.150.228:${PORT}`);
 });
