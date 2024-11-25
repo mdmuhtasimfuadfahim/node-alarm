@@ -9,13 +9,21 @@ function App() {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    // Request notification permission
+    if (Notification.permission !== 'granted') {
+      Notification.requestPermission();
+    }
+
     // Establish WebSocket connection to the backend
-    socket = io('http://45.248.150.228:4565'); // Backend WebSocket URL
+    socket = io('http://localhost:4565'); // Backend WebSocket URL
     setIsConnected(true);
 
     // Listen for alarm events from the backend
     socket.on('alarm', (data) => {
       setAlarm(data.status); // Update alarm state when triggered
+      if (data.status === 'RED') {
+        showNotification('Alarm Triggered', 'An alarm has been triggered!');
+      }
     });
 
     console.log('Socket connected');
@@ -37,6 +45,12 @@ function App() {
   const removeAlarm = () => {
     if (socket && isConnected) {
       socket.emit('remove-alarm'); // Send alarm removal event to the backend
+    }
+  };
+
+  const showNotification = (title, body) => {
+    if (Notification.permission === 'granted') {
+      new Notification(title, { body });
     }
   };
 

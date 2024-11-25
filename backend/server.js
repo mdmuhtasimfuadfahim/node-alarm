@@ -14,25 +14,32 @@ app.use(cors({
 // Initialize Socket.IO with CORS for WebSocket connections
 const io = new Server(server, {
     cors: {
-        origin: 'http://45.248.150.228:3000', // Allow the frontend origin
+        origin: 'http://localhost:3000', // Allow the frontend origin
         methods: ['GET', 'POST'], // HTTP methods allowed
     },
 });
+
+let alarmState = 'OFF'; // Store the alarm state
 
 // Handle socket connections
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
+    // Send the current alarm state to the new connection
+    socket.emit('alarm', { status: alarmState });
+
     // Handle alarm trigger
     socket.on('trigger-alarm', () => {
         console.log('Alarm triggered');
-        io.emit('alarm', { status: 'RED' }); // Broadcast alarm to all connected clients
+        alarmState = 'RED'; // Update the alarm state
+        io.emit('alarm', { status: alarmState }); // Broadcast alarm to all connected clients
     });
 
     // Handle alarm removal
     socket.on('remove-alarm', () => {
         console.log('Alarm removed');
-        io.emit('alarm', { status: 'OFF' }); // Broadcast alarm removal to all connected clients
+        alarmState = 'OFF'; // Update the alarm state
+        io.emit('alarm', { status: alarmState }); // Broadcast alarm removal to all connected clients
     });
 
     // Handle socket disconnection
@@ -44,5 +51,5 @@ io.on('connection', (socket) => {
 // Start the server
 const PORT = 4565;
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://45.248.150.228:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
